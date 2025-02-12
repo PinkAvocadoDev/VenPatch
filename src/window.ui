@@ -26,7 +26,7 @@
             <property name="halign">3</property>
             <child>
               <object class="GtkImage">
-                <property name="icon-name">display-brightness-symbolic</property>
+                <property name="icon-name">io.github.pinkavocadodev.venpatch</property>
                 <property name="pixel-size">196</property>
                 <property name="margin-bottom">30</property>
                 <style>
