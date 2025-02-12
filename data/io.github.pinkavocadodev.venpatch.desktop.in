@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=venpatch
+Exec=venpatch
+Icon=io.github.pinkavocadodev.venpatch
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true

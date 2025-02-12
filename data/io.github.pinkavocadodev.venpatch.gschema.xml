@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="venpatch">
+	<schema id="io.github.pinkavocadodev.venpatch" path="/io/github/pinkavocadodev/venpatch/">
+	</schema>
+</schemalist>

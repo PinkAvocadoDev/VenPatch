@@ -1,0 +1,6 @@
+data/io.github.pinkavocadodev.venpatch.desktop.in
+data/io.github.pinkavocadodev.venpatch.metainfo.xml.in
+data/io.github.pinkavocadodev.venpatch.gschema.xml
+src/main.py
+src/window.py
+src/window.ui

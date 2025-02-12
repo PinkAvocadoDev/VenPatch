@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="VenpatchWindow" parent="AdwApplicationWindow">
+    <property name="default-height">550</property>
+    <property name="default-width">300</property>
+    <property name="resizable">false</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="primary">true</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Menu</property>
+                <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="welcome">
+            <property name="orientation">1</property>
+            <property name="valign">3</property>
+            <property name="halign">3</property>
+            <child>
+              <object class="GtkImage">
+                <property name="icon-name">display-brightness-symbolic</property>
+                <property name="pixel-size">196</property>
+                <property name="margin-bottom">30</property>
+                <style>
+                  <class name="icon-dropshadow"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Welcome to VenPatch</property>
+                <property name="margin-bottom">10</property>
+                <style>
+                  <class name="title-1"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label">To prepare Discord for patching,
+please set its path in Preferences.</property>
+                <property name="justify">2</property>
+                <property name="margin-bottom">20</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="pillInstall">
+                <property name="name">Install Vencord</property>
+                <property name="label" translatable="yes">Install Vencord</property>
+                <property name="margin-bottom">10</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="pillRepair">
+                <property name="name">pillRepair</property>
+                <property name="label" translatable="yes">Repair Vencord</property>
+                <property name="margin-bottom">10</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="pillRepair"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="pillUnistall">
+                <property name="name">Uninstall Vencord</property>
+                <property name="label" translatable="yes">Uninstall Vencord</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="destructive-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_About VenPatch</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
