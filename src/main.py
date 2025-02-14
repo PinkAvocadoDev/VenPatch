@@ -19,6 +19,8 @@
 
 import sys
 import gi
+import os
+import subprocess
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -30,6 +32,8 @@ from .window import VenpatchWindow
 class VenpatchApplication(Adw.Application):
     """The main application singleton class."""
 
+    usr_data_folder = subprocess.run("echo $HOME", shell = True,capture_output=True, text=True).stdout[:-1] + "/.var/app/io.github.pinkavocadodev.venpatch/data/"
+
     def __init__(self):
         super().__init__(
             application_id="io.github.pinkavocadodev.venpatch",
@@ -37,6 +41,8 @@ class VenpatchApplication(Adw.Application):
         )
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
+        self.create_action('preferences', self.on_preferences_action)
+        self.initial_setup()
 
     def do_activate(self):
         """Called when the application is activated.
@@ -49,11 +55,15 @@ class VenpatchApplication(Adw.Application):
             win = VenpatchWindow(application=self)
         win.present()
 
+    def on_preferences_action(self, widget, _):
+        """Callback for the app.preferences action."""
+        print('app.preferences action activated')
+
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
         about = Adw.AboutWindow(
             transient_for=self.props.active_window,
-            application_name="venpatch",
+            application_name="VenPatch",
             application_icon="io.github.pinkavocadodev.venpatch",
             developer_name="Andrea",
             version="0.1.0",
@@ -76,6 +86,37 @@ class VenpatchApplication(Adw.Application):
         self.add_action(action)
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
+
+    def initial_setup(self):
+        #Generate askpass.sh file
+        if not os.path.isfile(self.usr_data_folder + "askpass.sh") :
+            print("Generating askpass.sh")
+            with open(self.usr_data_folder + "askpass.sh", "w") as ask:
+                ask.write('''\
+#!/bin/bash
+zenity --password --title "Sudo permission required"''')
+
+        chmod_askpass = subprocess.run("chmod +x $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/askpass.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
+
+        #Generate install.sh script
+        if not os.path.isfile(self.usr_data_folder + "install.sh") :
+            print("Generating install.sh")
+            with open(self.usr_data_folder + "install.sh", 'w') as ins:
+                ins.write('''\
+#!/bin/bash
+data_dir="${XDG_DATA_HOME:-$HOME/.var/app/}/io.github.pinkavocadodev.venpatch/data/outfile"
+curl -sS https://github.com/Vendicated/VencordInstaller/releases/latest/download/VencordInstallerCli-Linux \
+--output $data_dir \
+--location \
+--fail
+chmod +x "${XDG_DATA_HOME:-$HOME/.var/app/}/io.github.pinkavocadodev.venpatch/data/outfile"''')
+
+        chmod_installer = subprocess.run("chmod +x $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/install.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
+
+        #Download VencordInstaller
+        if not os.path.isfile(self.usr_data_folder + "outfile") :
+            print("Downloading")
+            venc_installer_run = subprocess.run("flatpak-spawn --host $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/./install.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
 
 
 def main(version):
