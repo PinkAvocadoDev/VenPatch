@@ -41,6 +41,7 @@ class VenpatchApplication(Adw.Application):
         )
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
+        log("Application initialized")
 
     def do_activate(self):
         """Called when the application is activated.
@@ -67,6 +68,7 @@ class VenpatchApplication(Adw.Application):
             copyright="© 2025 Andrea",
         )
         about.present()
+        log("About screen initialized")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
@@ -85,5 +87,6 @@ class VenpatchApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
+    log("START")
     app = VenpatchApplication()
     return app.run(sys.argv)

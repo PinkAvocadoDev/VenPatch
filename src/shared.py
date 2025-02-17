@@ -19,14 +19,19 @@
 
 #Contains any shared functions between .py scripts
 
-import os
+import logging
 import subprocess
+import os
+
+from gi.repository import Gtk, Adw, GObject
+
+logging.basicConfig(level=logging.DEBUG)
 
 def initial_setup():
     #DESCRIPTION: check if necessary files are present, if not, creates/downloads them
     #Generate askpass.sh file
     if not os.path.isfile(return_user_data_folder() + "askpass.sh") :
-        print("Generating askpass.sh")
+        log("initial_setup(): Generating askpass.sh")
         with open(return_user_data_folder() + "askpass.sh", "w") as ask:
             ask.write('''\
 #!/bin/bash
@@ -36,7 +41,7 @@ zenity --password --title "Sudo permission required"''')
 
     #Generate install.sh script
     if not os.path.isfile(return_user_data_folder() + "install.sh") :
-        print("Generating install.sh")
+        log("initial_setup(): Generating install.sh")
         with open(return_user_data_folder() + "install.sh", 'w') as ins:
             ins.write('''\
 #!/bin/bash
@@ -51,9 +56,24 @@ chmod +x "${XDG_DATA_HOME:-$HOME/.var/app/}/io.github.pinkavocadodev.venpatch/da
 
     #Download VencordInstaller
     if not os.path.isfile(return_user_data_folder() + "outfile") :
-        print("DEBUG: Downloading Outfile")
+        log("initial_setup(): Downloading Outfile <Vencord installer binary>")
         venc_installer_run = subprocess.run("flatpak-spawn --host $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/./install.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
 
 def return_user_data_folder():
     usr_data_folder = subprocess.run("echo $HOME", shell = True,capture_output=True, text=True).stdout[:-1] + "/.var/app/io.github.pinkavocadodev.venpatch/data/"
     return usr_data_folder
+
+def show_toast(win, message):
+        toast = Adw.Toast.new(message)
+        toast.set_timeout(5)
+        win.toast_overlay.add_toast(toast)
+
+def apply_css(widget, css):
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css.encode("utf-8"))
+
+        context = widget.get_style_context()
+        context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+def log(message):
+    logging.debug(message)
