@@ -20,7 +20,7 @@
           </object>
         </child>
         <child>
-          <object class="GtkBox" id="welcome">
+          <object class="GtkBox" id="main-box">
             <property name="orientation">1</property>
             <property name="valign">3</property>
             <property name="halign">3</property>
@@ -28,7 +28,7 @@
               <object class="GtkImage">
                 <property name="icon-name">io.github.pinkavocadodev.venpatch</property>
                 <property name="pixel-size">196</property>
-                <property name="margin-bottom">30</property>
+                <property name="margin-bottom">15</property>
                 <style>
                   <class name="icon-dropshadow"/>
                 </style>
@@ -45,8 +45,8 @@
             </child>
             <child>
               <object class="GtkLabel">
-                <property name="label">To prepare Discord for patching,
-please set its path in Preferences.</property>
+                <property name="label">VenPatch is a simple GUI application
+for Vencord patching</property>
                 <property name="justify">2</property>
                 <property name="margin-bottom">20</property>
               </object>
@@ -86,11 +86,15 @@ please set its path in Preferences.</property>
                 </style>
               </object>
             </child>
+            <child>
+               <object class="AdwToastOverlay" id="toastOverlay">
+                </object>
+            </child>
           </object>
         </child>
       </object>
     </property>
-  </template>
+    </template>
   <menu id="primary_menu">
     <section>
       <item>

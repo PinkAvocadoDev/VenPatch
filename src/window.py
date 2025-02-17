@@ -18,18 +18,25 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import subprocess
 import os
+import time
+import webbrowser
 
 from gi.repository import Adw, Gtk, GObject, Gdk, GLib
+from .shared import *
 
 @Gtk.Template(resource_path='/io/github/pinkavocadodev/venpatch/window.ui')
 class VenpatchWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'VenpatchWindow'
 
-    usr_data_folder = subprocess.run("echo $HOME", shell = True,capture_output=True, text=True).stdout[:-1] + "/.var/app/io.github.pinkavocadodev.venpatch/data/"
+    main_box = Gtk.Template.Child("main-box")
+
+    toast_overlay = Gtk.Template.Child("toastOverlay")
 
     uninstall = Gtk.Template.Child("pillUninstall")
     repair = Gtk.Template.Child("pillRepair")
     install = Gtk.Template.Child("pillInstall")
+
+    usr_data_folder = return_user_data_folder()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,6 +48,11 @@ class VenpatchWindow(Adw.ApplicationWindow):
         self.install.connect("clicked", self.on_click)
         self.uninstall.connect("clicked", self.on_click)
 
+    def on_preferences_action(self, widget, _):
+        """Callback for the app.preferences action."""
+        dialog = PreferencesDialog(self)
+        dialog.present()
+
     def apply_css(self, widget, css):
         provider = Gtk.CssProvider()
         provider.load_from_data(css.encode("utf-8"))
@@ -48,10 +60,17 @@ class VenpatchWindow(Adw.ApplicationWindow):
         context = widget.get_style_context()
         context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+
+    def show_toast(self, button, title):
+        toast = Adw.Toast(title)
+        toast.set_timeout(2)
+        self.overlay.set_child(toast)
+
+
     def on_click(self, button):
         #Disable button
         self.set_sensitive(False)
-
+        GLib.idle_add(initial_setup)
         #Force sync execution of repair script
         while GLib.MainContext.default().pending():
            GLib.MainContext.default().iteration(True)
@@ -67,12 +86,17 @@ class VenpatchWindow(Adw.ApplicationWindow):
         #Re-enable the button
         self.set_sensitive(True)
 
+    def show_toast(self, message):
+        toast = Adw.Toast.new(message)
+        self.toast_overlay.add_toast(toast)
+
     #--------------------INSTALL BUTTON-------------------------
     def run_install(self):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
         process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --install", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
         stdout, stderr = process.communicate(input='\n')
+        self.show_toast("Success")
         print("STDOUT::",stdout)
     #-----------------------------------------------------------
 
@@ -93,4 +117,79 @@ class VenpatchWindow(Adw.ApplicationWindow):
         stdout, stderr = process.communicate(input='\n')
         print("STDOUT::",stdout)
     #------------------------------------------------------------
+
+class PreferencesDialog(Adw.PreferencesWindow):
+    usr_data_folder = return_user_data_folder()
+    def __init__(self, parent):
+        super().__init__()
+        self.set_title("Preferences")
+        self.set_transient_for(parent)
+        self.set_default_size(300, 400)
+        self.set_resizable(False)
+
+        # Create a ToastOverlay
+        self.toast_overlay = Adw.ToastOverlay()
+
+        page = Adw.PreferencesPage()
+        group1 = Adw.PreferencesGroup(title="Vencord")
+        group2 = Adw.PreferencesGroup(title="General settings")
+
+        updateVencord = Adw.ButtonRow()
+        updateVencord.set_name("updateVencord")
+        updateVencord.set_title("Update Vencord Installer binary")
+        updateVencord.connect("activated", self.on_click)
+        updateVencord.get_style_context().add_class("updateVencord")
+
+        updateVenPatch = Adw.ButtonRow()
+        updateVenPatch.set_title("Check for updates for VenPatch")
+        updateVenPatch.connect("activated", self.on_click)
+        updateVenPatch.get_style_context().add_class("updateVenPatch")
+
+        self.apply_css(updateVencord, ".updateVencord{background-color:#613583;color:#dc8add;}")
+        self.apply_css(updateVenPatch, ".updateVenPatch{background-color:#613583;color:#dc8add;}")
+        group1.add(updateVencord)
+        group2.add(updateVenPatch)
+        page.add(group2)
+        page.add(group1)
+
+        # Add the toast overlay to the window
+        group1.add(self.toast_overlay)
+        self.add(page)
+
+    def show_toast(self, message):
+        toast = Adw.Toast.new(message)
+        self.toast_overlay.add_toast(toast)
+
+    def apply_css(self, widget, css):
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css.encode("utf-8"))
+
+        context = widget.get_style_context()
+        context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def on_click(self, button):
+
+        #Force async execution of script
+        while GLib.MainContext.default().pending():
+           GLib.MainContext.default().iteration(True)
+
+        match button.get_name():
+           case "updateVencord":
+               self.set_sensitive(False)
+               GLib.idle_add(initial_setup)
+               GLib.idle_add(self.run_update)
+               self.set_sensitive(True)
+               self.show_toast("Done!")
+           case _:
+               self.run_redirect()
+
+    def run_redirect(self):
+        webbrowser.open("https://github.com/PinkAvocadoDev/VenPatch/releases/latest")
+        print("DEBUG: run_redirect()")
+
+    def run_update(self):
+        delete = subprocess.Popen(f"rm {self.usr_data_folder}outfile", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash")
+        initial_setup()
+        print("DEBUG: run_update()")
+
 
