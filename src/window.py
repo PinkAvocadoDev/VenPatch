@@ -1,6 +1,6 @@
 # window.py
 #
-# Copyright 2025 Andrea
+# Copyright 2025 PinkAvocadoDev
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -168,6 +168,7 @@ class PreferencesDialog(Adw.PreferencesWindow):
 
         updateVenPatch = Adw.ButtonRow()
         updateVenPatch.set_title("Check for updates for VenPatch")
+        updateVenPatch.set_name("updateVenPatch")
         updateVenPatch.connect("activated", self.on_click)
         updateVenPatch.get_style_context().add_class("updateVenPatch")
 

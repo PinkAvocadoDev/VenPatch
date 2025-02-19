@@ -33,7 +33,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file:///home/andrea/Projects"
+                    "url" : "https://github.com/PinkAvocadoDev/VenPatch.git"
                 }
             ]
         }
