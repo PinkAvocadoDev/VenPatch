@@ -62,9 +62,9 @@ class VenpatchApplication(Adw.Application):
             transient_for=self.props.active_window,
             application_name="VenPatch",
             application_icon="io.github.pinkavocadodev.venpatch",
-            developer_name=["PinkAvocadoDev https://github.com/PinkAvocadoDev"],
+            developer_name="PinkAvocadoDev",
             version="1.0.0",
-            developers=["PinkAvocadoDev"],
+            developers=["PinkAvocadoDev https://github.com/PinkAvocadoDev"],
             copyright="© 2025 PinkAvocadoDev",
         )
         about.add_credit_section("Vencord", ["Vendicated https://github.com/Vendicated"])
