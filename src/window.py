@@ -56,11 +56,10 @@ class VenpatchWindow(Adw.ApplicationWindow):
         dialog.present()
 
     def on_click(self, button):
-        #Disable button
         self.set_sensitive(False)
         #Ensure data exists
         GLib.idle_add(initial_setup)
-        #Force sync execution of repair script
+
         while GLib.MainContext.default().pending():
            GLib.MainContext.default().iteration(True)
 
@@ -92,7 +91,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
             show_toast(self, "Error!")
 
         log("run_install, exit code: "+str(exit_code))
-    #-----------------------------------------------------------
+    #------------------------------------------------------------------------
 
     #--------------------REPAIR BUTTON--------------------------
     def run_repair(self):
@@ -110,7 +109,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
             show_toast(self, "Error!")
 
         log("run_repair, exit code: "+str(exit_code))
-    #------------------------------------------------------------
+    #------------------------------------------------------------------------
 
     #--------------------UNINSTALL BUTTON--------------------------
     def run_uninstall(self):
@@ -128,7 +127,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
             show_toast(self, "Error!")
 
         log("run_uninstall, exit code: "+str(exit_code))
-    #------------------------------------------------------------
+    #--------------------------------------------------------------------------------
 
 class PreferencesDialog(Adw.PreferencesWindow):
     usr_data_folder = return_user_data_folder()
