@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=venpatch
+Name=VenPatch
 Exec=venpatch
 Icon=io.github.pinkavocadodev.venpatch
 Terminal=false

@@ -20,15 +20,15 @@
           </object>
         </child>
         <child>
-          <object class="GtkBox" id="welcome">
+          <object class="GtkBox" id="main-box">
             <property name="orientation">1</property>
             <property name="valign">3</property>
             <property name="halign">3</property>
             <child>
               <object class="GtkImage">
-                <property name="icon-name">display-brightness-symbolic</property>
+                <property name="icon-name">io.github.pinkavocadodev.venpatch</property>
                 <property name="pixel-size">196</property>
-                <property name="margin-bottom">30</property>
+                <property name="margin-bottom">15</property>
                 <style>
                   <class name="icon-dropshadow"/>
                 </style>
@@ -45,20 +45,21 @@
             </child>
             <child>
               <object class="GtkLabel">
-                <property name="label">To prepare Discord for patching,
-please set its path in Preferences.</property>
+                <property name="label">VenPatch is a simple GUI application
+for Vencord patching</property>
                 <property name="justify">2</property>
                 <property name="margin-bottom">20</property>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="pillInstall">
-                <property name="name">Install Vencord</property>
+                <property name="name">pillInstall</property>
                 <property name="label" translatable="yes">Install Vencord</property>
                 <property name="margin-bottom">10</property>
+                <property name="sensitive">true</property>
                 <style>
                   <class name="pill"/>
-                  <class name="suggested-action"/>
+                  <class name="suggested"/>
                 </style>
               </object>
             </child>
@@ -67,6 +68,7 @@ please set its path in Preferences.</property>
                 <property name="name">pillRepair</property>
                 <property name="label" translatable="yes">Repair Vencord</property>
                 <property name="margin-bottom">10</property>
+                <property name="sensitive">true</property>
                 <style>
                   <class name="pill"/>
                   <class name="pillRepair"/>
@@ -74,22 +76,31 @@ please set its path in Preferences.</property>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="pillUnistall">
-                <property name="name">Uninstall Vencord</property>
+              <object class="GtkButton" id="pillUninstall">
+                <property name="name">pillUninstall</property>
                 <property name="label" translatable="yes">Uninstall Vencord</property>
+                <property name="sensitive">true</property>
                 <style>
                   <class name="pill"/>
-                  <class name="destructive-action"/>
+                  <class name="destroy"/>
                 </style>
               </object>
+            </child>
+            <child>
+               <object class="AdwToastOverlay" id="toastOverlay">
+                </object>
             </child>
           </object>
         </child>
       </object>
     </property>
-  </template>
+    </template>
   <menu id="primary_menu">
     <section>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
       <item>
         <attribute name="label" translatable="yes">_About VenPatch</attribute>
         <attribute name="action">app.about</attribute>

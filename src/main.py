@@ -19,16 +19,20 @@
 
 import sys
 import gi
+import os
+import subprocess
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Gio, Adw
+from gi.repository import Gtk, Gio, Adw, GLib
 from .window import VenpatchWindow
-
+from .shared import *
 
 class VenpatchApplication(Adw.Application):
     """The main application singleton class."""
+
+    usr_data_folder = return_user_data_folder()
 
     def __init__(self):
         super().__init__(
@@ -37,6 +41,7 @@ class VenpatchApplication(Adw.Application):
         )
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
+        log("Application initialized")
 
     def do_activate(self):
         """Called when the application is activated.
@@ -47,13 +52,15 @@ class VenpatchApplication(Adw.Application):
         win = self.props.active_window
         if not win:
             win = VenpatchWindow(application=self)
+        self.create_action("preferences", win.on_preferences_action)
+        initial_setup()
         win.present()
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
         about = Adw.AboutWindow(
             transient_for=self.props.active_window,
-            application_name="venpatch",
+            application_name="VenPatch",
             application_icon="io.github.pinkavocadodev.venpatch",
             developer_name="Andrea",
             version="0.1.0",
@@ -61,6 +68,7 @@ class VenpatchApplication(Adw.Application):
             copyright="© 2025 Andrea",
         )
         about.present()
+        log("About screen initialized")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
@@ -77,8 +85,8 @@ class VenpatchApplication(Adw.Application):
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
 
-
 def main(version):
     """The application's entry point."""
+    log("START")
     app = VenpatchApplication()
     return app.run(sys.argv)

@@ -31,6 +31,7 @@ venpatch_sources = [
   '__init__.py',
   'main.py',
   'window.py',
+  'shared.py'
 ]
 
 install_data(venpatch_sources, install_dir: moduledir)
