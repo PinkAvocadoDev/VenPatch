@@ -19,6 +19,7 @@
 
 #Contains any shared functions between .py scripts
 
+import json
 import logging
 import subprocess
 import os
@@ -27,12 +28,25 @@ from gi.repository import Gtk, Adw, GObject
 
 logging.basicConfig(level=logging.DEBUG)
 
+def return_user_data_folder():
+    usr_data_folder = subprocess.run("echo $HOME", shell = True,capture_output=True, text=True).stdout[:-1] + "/.var/app/io.github.pinkavocadodev.venpatch/data/"
+    return usr_data_folder
+
+usr_data_folder = return_user_data_folder()
+
 def initial_setup():
     #DESCRIPTION: check if necessary files are present, if not, creates/downloads them
+    #Generate config.json
+    if not os.path.isfile(usr_data_folder + "config.json"):
+        log("initial_setup(): Generating config.json <the settings have been reset!>")
+        with open(usr_data_folder + "config.json", "w") as conf:
+            conf.write('''\
+{"discordPath": "default"}''')
+
     #Generate askpass.sh file
-    if not os.path.isfile(return_user_data_folder() + "askpass.sh") :
+    if not os.path.isfile(usr_data_folder + "askpass.sh") :
         log("initial_setup(): Generating askpass.sh")
-        with open(return_user_data_folder() + "askpass.sh", "w") as ask:
+        with open(usr_data_folder + "askpass.sh", "w") as ask:
             ask.write('''\
 #!/bin/bash
 zenity --password --title "Sudo permission required"''')
@@ -40,9 +54,9 @@ zenity --password --title "Sudo permission required"''')
     chmod_askpass = subprocess.run("chmod +x $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/askpass.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
 
     #Generate install.sh script
-    if not os.path.isfile(return_user_data_folder() + "install.sh") :
+    if not os.path.isfile(usr_data_folder + "install.sh") :
         log("initial_setup(): Generating install.sh")
-        with open(return_user_data_folder() + "install.sh", 'w') as ins:
+        with open(usr_data_folder + "install.sh", 'w') as ins:
             ins.write('''\
 #!/bin/bash
 data_dir="${XDG_DATA_HOME:-$HOME/.var/app/}/io.github.pinkavocadodev.venpatch/data/outfile"
@@ -55,13 +69,9 @@ chmod +x "${XDG_DATA_HOME:-$HOME/.var/app/}/io.github.pinkavocadodev.venpatch/da
     chmod_installer = subprocess.run("chmod +x $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/install.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
 
     #Download VencordInstaller
-    if not os.path.isfile(return_user_data_folder() + "outfile") :
+    if not os.path.isfile(usr_data_folder + "outfile") :
         log("initial_setup(): Downloading Outfile <Vencord installer binary>")
         venc_installer_run = subprocess.run("flatpak-spawn --host $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/./install.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
-
-def return_user_data_folder():
-    usr_data_folder = subprocess.run("echo $HOME", shell = True,capture_output=True, text=True).stdout[:-1] + "/.var/app/io.github.pinkavocadodev.venpatch/data/"
-    return usr_data_folder
 
 def show_toast(win, message):
         toast = Adw.Toast.new(message)
@@ -74,6 +84,25 @@ def apply_css(widget, css):
 
         context = widget.get_style_context()
         context.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+def read_conf():
+    if not is_conf_available():
+        initial_setup()
+    config = open(usr_data_folder + "config.json")
+    jsonParsed = json.load(config)
+    return jsonParsed["discordPath"]
+
+def set_conf(conf):
+    if not is_conf_available():
+        initial_setup()
+    jsonConf = {"discordPath" : conf}
+    with open(usr_data_folder + "config.json", "w") as conf:
+            conf.write(json.dumps(jsonConf))
+
+def is_conf_available():
+    if os.path.isfile(usr_data_folder + "config.json"):
+        return True
+    return False
 
 def log(message):
     logging.debug(message)

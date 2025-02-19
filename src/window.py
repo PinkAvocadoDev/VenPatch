@@ -48,6 +48,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
         self.install.connect("clicked", self.on_click)
         self.uninstall.connect("clicked", self.on_click)
         log("Main window initialized")
+        log(read_conf())
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
@@ -57,6 +58,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
     def on_click(self, button):
         #Disable button
         self.set_sensitive(False)
+        #Ensure data exists
         GLib.idle_add(initial_setup)
         #Force sync execution of repair script
         while GLib.MainContext.default().pending():
@@ -79,7 +81,10 @@ class VenpatchWindow(Adw.ApplicationWindow):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
         process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --install", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
-        stdout, stderr = process.communicate(input='\n')
+        if read_conf() == "default":
+            stdout, stderr = process.communicate(input='\n')
+        else:
+            stdout, stderr = process.communicate(input='\x1b[B\n'+read_conf()+'\n')
         exit_code = process.returncode
         if exit_code == 0:
             show_toast(self, "Success!")
@@ -94,7 +99,10 @@ class VenpatchWindow(Adw.ApplicationWindow):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
         process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --repair", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
-        stdout, stderr = process.communicate(input='\n')
+        if read_conf() == "default":
+            stdout, stderr = process.communicate(input='\n')
+        else:
+            stdout, stderr = process.communicate(input='\x1b[B\n'+read_conf()+'\n')
         exit_code = process.returncode
         if exit_code == 0:
             show_toast(self, "Success!")
@@ -109,7 +117,10 @@ class VenpatchWindow(Adw.ApplicationWindow):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
         process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --uninstall", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
-        stdout, stderr = process.communicate(input='\n')
+        if read_conf() == "default":
+            stdout, stderr = process.communicate(input='\n')
+        else:
+            stdout, stderr = process.communicate(input='\x1b[B\n'+read_conf()+'\n')
         exit_code = process.returncode
         if exit_code == 0:
             show_toast(self, "Success!")
@@ -123,6 +134,8 @@ class PreferencesDialog(Adw.PreferencesWindow):
     usr_data_folder = return_user_data_folder()
 
     toast_overlay = Adw.ToastOverlay()
+
+    save_config_btn = Adw.ButtonRow()
     def __init__(self, parent):
         super().__init__()
         self.set_title("Preferences")
@@ -132,13 +145,26 @@ class PreferencesDialog(Adw.PreferencesWindow):
 
         page = Adw.PreferencesPage()
         group1 = Adw.PreferencesGroup(title="Vencord")
-        group2 = Adw.PreferencesGroup(title="General settings")
+        self.group2 = Adw.PreferencesGroup(title="General settings")
 
         updateVencord = Adw.ButtonRow()
         updateVencord.set_name("updateVencord")
         updateVencord.set_title("Update Vencord Installer binary")
         updateVencord.connect("activated", self.on_click)
         updateVencord.get_style_context().add_class("updateVencord")
+
+        self.config_entry_row = Adw.EntryRow()
+        self.config_entry_row.set_title("Custom Discord Path")
+
+        is_custom_path = Adw.SwitchRow()
+        is_custom_path.set_title("Use custom path for Discord")
+        switch = is_custom_path.get_activatable_widget()
+        switch.connect("notify::active", self.on_switch_toggled)
+
+        self.save_config_btn = Adw.ButtonRow()
+        self.save_config_btn.set_name("saveConfig")
+        self.save_config_btn.set_title("Save Path")
+        self.save_config_btn.connect("activated", self.on_click)
 
         updateVenPatch = Adw.ButtonRow()
         updateVenPatch.set_title("Check for updates for VenPatch")
@@ -148,17 +174,38 @@ class PreferencesDialog(Adw.PreferencesWindow):
         apply_css(updateVencord, ".updateVencord{background-color:#613583;color:#dc8add;}")
         apply_css(updateVenPatch, ".updateVenPatch{background-color:#613583;color:#dc8add;}")
         group1.add(updateVencord)
-        group2.add(updateVenPatch)
-        page.add(group2)
+        self.group2.add(updateVenPatch)
+        self.group2.add(is_custom_path)
+        page.add(self.group2)
         page.add(group1)
+
+        is_default = True
+        if read_conf() != "default":
+            is_default = False
+            self.config_entry_row.set_text(read_conf())
+
+        is_custom_path.set_active(not is_default)
+        self.normalize_toggle(is_custom_path.get_active())
 
         # Add the toast overlay to the window
         group1.add(self.toast_overlay)
         self.add(page)
         log("PreferencesDialog initialized")
 
-    def on_click(self, button):
+    def normalize_toggle(self, state):
+        if state:
+            self.group2.add(self.config_entry_row)
+            self.group2.add(self.save_config_btn)
+        else:
+            set_conf("default")
+            self.group2.remove(self.config_entry_row)
+            self.group2.remove(self.save_config_btn)
 
+    def on_switch_toggled(self, switch, param):
+        state = switch.get_active()
+        self.normalize_toggle(state)
+
+    def on_click(self, button):
         #Force async execution of script
         while GLib.MainContext.default().pending():
            GLib.MainContext.default().iteration(True)
@@ -170,8 +217,11 @@ class PreferencesDialog(Adw.PreferencesWindow):
                GLib.idle_add(self.run_update)
                self.set_sensitive(True)
                show_toast(self, "Done!")
-           case _:
+           case "updateVenPatch":
                self.run_redirect()
+           case "saveConfig":
+               set_conf(self.config_entry_row.get_text())
+               log("Set new path: "+self.config_entry_row.get_text())
 
     def run_redirect(self):
         webbrowser.open("https://github.com/PinkAvocadoDev/VenPatch/releases/latest")
