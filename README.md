@@ -20,7 +20,7 @@ The app supports:
 
 
 
-                                                      <img src="readme_screenshot.png" alt="readme_screenshot"/>
+![readme_screenshot]("readme_screenshot.png"){:style="float:right"}
 
 
 
