@@ -20,7 +20,7 @@ The app supports:
 
 
 
-![readme_screenshot](readme_screenshot.png)
+<img src="readme_screenshot.png" alt="readme_screenshot" style="text-align:center"/>
 
 
 
