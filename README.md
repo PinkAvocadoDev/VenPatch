@@ -1,6 +1,6 @@
 # VenPatch
 
-![readme_logo](readme_logo.svg)
+![readme_logo](readme_logo.svg) 
 
 A simple GUI wrapper for the ever beloved Vencord installer.
 
@@ -17,6 +17,10 @@ The app supports:
 - Installing Vencord
 - Repairing the existing Vencord Installation
 - Uninstalling Vencord
+
+
+
+![readme_screenshot](readme_screenshot.png)
 
 
 
