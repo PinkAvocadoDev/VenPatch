@@ -1,7 +1,7 @@
 {
     "id" : "io.github.pinkavocadodev.venpatch",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "master",
+    "runtime-version" : "47",
     "sdk" : "org.gnome.Sdk",
     "command" : "venpatch",
     "finish-args": [
@@ -33,7 +33,8 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file:///home/andrea/Projects"
+                    "url" : "https://github.com/PinkAvocadoDev/VenPatch.git",
+                    "branch" : "develop"
                 }
             ]
         }
