@@ -19,7 +19,7 @@ The app supports:
 - Uninstalling Vencord
 
 
-<img src="readme_screenshot.png" alt="readme_screenshot" style="float:right"/>
+<img src="readme_screenshot.png" alt="readme_screenshot" style="display: block; margin:auto"/>
 
 
 
