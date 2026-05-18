@@ -28,6 +28,8 @@ from os import environ
 class VenpatchWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'VenpatchWindow'
 
+    whoami=''
+
     main_box = Gtk.Template.Child("main-box")
 
     toast_overlay = Gtk.Template.Child("toastOverlay")
@@ -47,8 +49,15 @@ class VenpatchWindow(Adw.ApplicationWindow):
         self.repair.connect("clicked", self.on_click)
         self.install.connect("clicked", self.on_click)
         self.uninstall.connect("clicked", self.on_click)
+        self.init_user()
         log("Main window initialized")
         log(read_conf())
+
+    def init_user(self):
+        env = os.environ.copy()
+        user_process = subprocess.Popen(f"flatpak-spawn --host whoami", stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, text=True, env=env)
+        self.whoami = user_process.communicate()[0].rstrip()
+        log("init_user: sudo user is "+self.whoami)
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
@@ -79,7 +88,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
     def run_install(self):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
-        process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --install", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
+        process = subprocess.Popen(f"flatpak-spawn --host pkexec env SUDO_USER={self.whoami} {self.usr_data_folder}./outfile --install", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
         if read_conf() == "default":
             stdout, stderr = process.communicate(input='\n')
         else:
@@ -97,7 +106,8 @@ class VenpatchWindow(Adw.ApplicationWindow):
     def run_repair(self):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
-        process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --repair", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
+
+        process = subprocess.Popen(f"flatpak-spawn --host pkexec env SUDO_USER={self.whoami} {self.usr_data_folder}./outfile --repair", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
         if read_conf() == "default":
             stdout, stderr = process.communicate(input='\n')
         else:
@@ -115,7 +125,7 @@ class VenpatchWindow(Adw.ApplicationWindow):
     def run_uninstall(self):
         env = os.environ.copy()
         env["DISPLAY"] = ":0"
-        process = subprocess.Popen(f"flatpak-spawn --host --env=SUDO_ASKPASS={self.usr_data_folder}askpass.sh sudo -A {self.usr_data_folder}./outfile --uninstall", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
+        process = subprocess.Popen(f"flatpak-spawn --host pkexec env SUDO_USER={self.whoami} {self.usr_data_folder}./outfile --uninstall", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash", env=env)
         if read_conf() == "default":
             stdout, stderr = process.communicate(input='\n')
         else:
@@ -231,5 +241,6 @@ class PreferencesDialog(Adw.PreferencesWindow):
         delete = subprocess.Popen(f"rm {self.usr_data_folder}outfile", shell = True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, executable="/bin/bash")
         initial_setup()
         log("run_update()")
+
 
 
