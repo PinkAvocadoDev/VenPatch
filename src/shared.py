@@ -43,16 +43,6 @@ def initial_setup():
             conf.write('''\
 {"discordPath": "default"}''')
 
-    #Generate askpass.sh file
-    if not os.path.isfile(usr_data_folder + "askpass.sh") :
-        log("initial_setup(): Generating askpass.sh")
-        with open(usr_data_folder + "askpass.sh", "w") as ask:
-            ask.write('''\
-#!/bin/bash
-zenity --password --title "Sudo permission required"''')
-
-    chmod_askpass = subprocess.run("chmod +x $HOME/.var/app/io.github.pinkavocadodev.venpatch/data/askpass.sh", shell = True,capture_output=True, text=True, executable="/bin/bash")
-
     #Generate install.sh script
     if not os.path.isfile(usr_data_folder + "install.sh") :
         log("initial_setup(): Generating install.sh")
