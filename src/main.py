@@ -1,6 +1,6 @@
 # main.py
 #
-# Copyright 2025 PinkAvocadoDev
+# Copyright 2026 PinkAvocadoDev
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,9 +63,9 @@ class VenpatchApplication(Adw.Application):
             application_name="VenPatch",
             application_icon="io.github.pinkavocadodev.venpatch",
             developer_name="PinkAvocadoDev",
-            version="1.0.0",
+            version="1.0.5",
             developers=["PinkAvocadoDev https://github.com/PinkAvocadoDev"],
-            copyright="© 2025 PinkAvocadoDev",
+            copyright="© 2026 PinkAvocadoDev",
         )
         about.add_credit_section("Vencord", ["Vendicated https://github.com/Vendicated"])
         about.present()
